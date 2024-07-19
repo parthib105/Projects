@@ -45,9 +45,4 @@ Sorts exams by their starting time.
 ### `def exams_schedule(exams: np.ndarray)`
 Generates and returns a formatted message for the upcoming exams.
 
-## How to Run
-
-1. Install the required library:
-   ```bash
-   pip install pywhatkit numpy
-
+Make sure to install the library `pywhatkit` using the following command `pip install pywhatkit`
