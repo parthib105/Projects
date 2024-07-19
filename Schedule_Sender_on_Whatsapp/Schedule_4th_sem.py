@@ -1,14 +1,24 @@
+# import libraries
 import pywhatkit as wp
 import time
 import numpy as np
 
+# It stores the following attributes
+# name : Name of the subject/course
+# place : Venue of the subject/course to be held
+# day : On which day the particular subject/course will be held
 class subject:
     def __init__(self, n, p, d):
         self.name = n
         self.place = p
         self.day = d
     
-
+# It stores the following attributes, details for exams
+# name : Name of the subject/course
+# place : Venue of the subject/course to be held
+# date : On which date, the exam is
+# day : On which day the particular subject/course will be held
+# time : Timings of the exam
 class exam:
     def __init__(self, n, p, dt, dy, t):
         self.name = n
@@ -17,12 +27,14 @@ class exam:
         self.day = dy
         self.time = t
         
-        
+# Function to schedule the daily subjects/courses
+# subjects : list of subject
 def schedule(subjects):
+    # get the current day, ex. Mo -> Monday, Tu -> Tuesday etc.
     da = time.ctime(time.time())[0:2]
-    # da = "Mo"
+
+    # msg variable to send the message
     msg = "Today's class timings\n\n"
-    # msg = ""
     
     temp_arr = []
     for i in subjects:
@@ -30,7 +42,7 @@ def schedule(subjects):
             if (j == da):
                 temp_arr.append(subject(i.name, i.place, i.day[j])) #i.day[j] is timings of class on specific day
                 
-    # sorting according to time
+    # sorting according to time (can be replaced by inbuild sort function)
     for i in range(len(temp_arr) - 1):
         for j in range(i+1, len(temp_arr)):
             if (int(temp_arr[j].day[0:2]) < int(temp_arr[i].day[0:2])):
@@ -38,11 +50,12 @@ def schedule(subjects):
     
     # creating string of message
     for i in temp_arr:
-            
-        if (int(i.day[0:2]) > 12):
+        start_hour = int(subj.day[:2])
+        end_hour = int(subj.day[12:14])
+        if (start_hour > 12):
             t = f"0{int(i.day[:2]) - 12}{i.day[2:12]}0{int(i.day[12:14]) - 12}{i.day[14:]}"
             msg += "Course :  " + i.name + "\nVenue  :  " + i.place + "\nTime   :  " + t + "\n\n"
-        elif (int(i.day[:2]) < 12 and int(i.day[12:14]) > 12):
+        elif (start_hour < 12 and end_hour > 12):
             t = f"{i.day[:12]}0{int(i.day[12:14]) - 12}{i.day[14:]}"
             msg += "Course :  " + i.name + "\nVenue  :  " + i.place + "\nTime   :  " + t + "\n\n"
         else:
@@ -75,15 +88,6 @@ def srt(exams):
 
 def exams_schedule(exams : np.ndarray):
     n = len(exams)
-    
-    # sorting according to date of exam
-    # for i in range(n - 1):
-    #     for j in range(i+1, n):
-    #         days_i = date_to_day(exams.date)
-    #         days_j = date_to_day(exams.date)
-    #         if (days_j < days_i):
-    #             exams[j], exams[i] = exams[i], exams[j]
-    
     exam_schd = []
     # sort according to time
     i = 0
@@ -145,8 +149,9 @@ if (__name__ == "__main__"):
     # custom message
     # "Course : Molecular and Cellular Biology (exam)\nVenue  : BT-009\nTime   : 12:00 to 01:00\n"
     
-    # print(schedule(subjects))
-    # wp.sendwhatmsg_to_group_instantly("CrrCGsFykPnCm912n4S0yp", display(arr)) 
+    # Enter the group id or chat id
+    group_id = "CrrCGsFykPnCm912n4S0yp"
+    wp.sendwhatmsg_to_group_instantly(group_id, display(arr)) 
     
     
     ############################## EXAMS ##############################
