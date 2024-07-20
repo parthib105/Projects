@@ -14,9 +14,6 @@ This is a simple Library Management System implemented in C++. It allows users t
   - [Borrowing a Book](#borrowing-a-book)
   - [Returning a Book](#returning-a-book)
   - [Searching for a Book](#searching-for-a-book)
-- [Example Input File](#example-input-file)
-- [Compiling and Running](#compiling-and-running)
-- [File Descriptions](#file-descriptions)
 
 ## Classes and Attributes
 
