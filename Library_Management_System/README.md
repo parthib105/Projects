@@ -40,4 +40,8 @@ This is a simple Library Management System implemented in C++. It allows users t
 ### Adding a Book
 To add a new book to the library:
 ```cpp
+Library library
 library.add_book("The Catcher in the Rye", "J.D. Salinger", "9780316769488", 5);
+
+### Adding a User
+
