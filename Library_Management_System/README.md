@@ -40,8 +40,29 @@ This is a simple Library Management System implemented in C++. It allows users t
 ### Adding a Book
 To add a new book to the library:
 ```cpp
-Library library
 library.add_book("The Catcher in the Rye", "J.D. Salinger", "9780316769488", 5);
+```
 
 ### Adding a User
+To add a new book to the library:
+```cpp
+library.add_user("1234", "Alice");
+```
 
+### Borrowing a Book
+To borrow a book from the library:
+```cpp
+library.borrow_book("1234", "9780316769488");
+```
+
+### Returning a Book
+To return a book to the library:
+```cpp
+library.return_book("1234", "9780316769488");
+```
+
+### Searching for a Book
+To search a book in the library:
+```cpp
+Book book = library.search_book("9780316769488");
+```
