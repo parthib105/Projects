@@ -1,4 +1,4 @@
-# Dynamic Matrix Squaring
+# Dynamic Matrix Squaring using various mutual exclusion algorithms
 
 ## Overview
 
