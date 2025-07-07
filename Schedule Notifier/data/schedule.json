@@ -1,0 +1,89 @@
+{
+  "subjects": [
+    {
+      "name": "Mathematical Methods",
+      "place": "MA-01",
+      "schedule": {
+        "Mon": [
+          "09:00",
+          "09:55"
+        ],
+        "Wed": [
+          "11:00",
+          "11:55"
+        ],
+        "Thu": [
+          "10:00",
+          "10:55"
+        ]
+      }
+    },
+    {
+      "name": "Random Processes",
+      "place": "LHC-07",
+      "schedule": {
+        "Mon": [
+          "10:00",
+          "10:55"
+        ],
+        "Wed": [
+          "09:00",
+          "09:55"
+        ],
+        "Thu": [
+          "11:00",
+          "11:55"
+        ]
+      }
+    },
+    {
+      "name": "Mathematics behind Machine Learning",
+      "place": "LHC-05",
+      "schedule": {
+        "Mon": [
+          "11:00",
+          "11:55"
+        ],
+        "Wed": [
+          "10:00",
+          "10:55"
+        ],
+        "Thu": [
+          "09:00",
+          "09:55"
+        ]
+      }
+    },
+    {
+      "name": "Quantum Computing",
+      "place": "CS-01",
+      "schedule": {
+        "Mon": [
+          "16:00",
+          "17:25"
+        ],
+        "Thu": [
+          "14:30",
+          "15:55"
+        ]
+      }
+    },
+    {
+      "name": "Distributed Computing",
+      "place": "C-LH-02",
+      "schedule": {
+        "Tue": [
+          "14:30",
+          "15:55"
+        ],
+        "Fri": [
+          "16:00",
+          "17:25"
+        ]
+      }
+    }
+  ],
+  "exams": [],
+  "assignments": [],
+  "last_updated": "2025-07-07T21:25:09.820530"
+}

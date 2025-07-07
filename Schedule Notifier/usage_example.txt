@@ -1,0 +1,23 @@
+# Show today's schedule
+python main.py today
+
+# Show today's schedule and send to WhatsApp
+python main.py today --send
+
+# Show upcoming events
+python main.py upcoming
+
+# Add new items
+python main.py add
+
+# Configure settings
+python main.py settings
+
+# List all data
+python main.py list-all
+
+# Show weekly overview
+python main.py week
+
+# Test WhatsApp connection
+python main.py test
