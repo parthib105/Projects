@@ -27,7 +27,7 @@ Each project is self-contained, well-documented, and modular — built with lear
 * ⚖️ Priority-based preferred withdrawal logic
 * 🧵 Thread-safe logging
 * 📈 Simulates realistic wait times using exponential distribution
-* 📚 [View Project](./banking_simulation/README.md)
+* 📚 [View Project](./Lock-Free_savings_account/README.md)
 
 ---
 
