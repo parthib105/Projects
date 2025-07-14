@@ -63,5 +63,6 @@ Each project is self-contained, well-documented, and modular — built with lear
 ## 👨‍💻 Author
 
 **Parthib Ghosh**
+
 B.Tech in Computational Engineering, IIT Hyderabad
 🌐 [GitHub](https://github.com/parthib105)
