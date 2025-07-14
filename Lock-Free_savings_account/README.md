@@ -1,7 +1,3 @@
-Sure! Here’s the final `README.md` for your **Banking Simulation** project **without any reference to a Makefile**:
-
----
-
 ## 🏦 Banking Simulation (Multithreaded using `pthreads`)
 
 This project simulates a multithreaded banking system where multiple users (threads) perform deposits and withdrawals (ordinary and preferred) on shared accounts. It demonstrates synchronization using mutexes and condition variables.
