@@ -1,0 +1,67 @@
+Program started with parameters: n=5, p=10, t=10, alpha=1.500000
+Thr1 requests for a preferred withdrawal of amount 140.000000 from account a 9 at 21:43:06.201.
+Thr2 requests for a withdrawal of amount 69.000000 from account a9 at 21:43:06.201.
+Thr3 requests for a deposit of amount 260.000000 into account a2 at 21:43:06.201.
+Thr1 wakes up and deducts 140.000000 from account a9 at 21:43:06.202.
+Thr3 enters the CS to perform a deposit of amount 260 and wakes all threads sleeping on a2 at 21:43:06.202.
+Thr5 requests for a deposit of amount 116.000000 into account a5 at 21:43:06.202.
+Thr2 wakes up and deducts 69.000000 from account a9 at 21:43:06.202.
+Thr5 enters the CS to perform a deposit of amount 116 and wakes all threads sleeping on a5 at 21:43:06.202.
+Thr4 requests for a withdrawal of amount 289.000000 from account a1 at 21:43:06.201.
+Thr4 wakes up and deducts 289.000000 from account a1 at 21:43:06.202.
+Thr3 requests for a preferred withdrawal of amount 343.000000 from account a 6 at 21:43:06.203.
+Thr3 wakes up and deducts 343.000000 from account a6 at 21:43:06.203.
+Thr2 requests for a deposit of amount 56.000000 into account a7 at 21:43:06.206.
+Thr2 enters the CS to perform a deposit of amount 56 and wakes all threads sleeping on a7 at 21:43:06.206.
+Thr5 requests for a preferred withdrawal of amount 377.000000 from account a 7 at 21:43:06.213.
+Thr5 wakes up and deducts 377.000000 from account a7 at 21:43:06.213.
+Thr2 requests for a deposit of amount 422.000000 into account a7 at 21:43:06.214.
+Thr2 enters the CS to perform a deposit of amount 422 and wakes all threads sleeping on a7 at 21:43:06.214.
+Thr2 requests for a deposit of amount 182.000000 into account a8 at 21:43:06.215.
+Thr2 enters the CS to perform a deposit of amount 182 and wakes all threads sleeping on a8 at 21:43:06.215.
+Thr2 requests for a preferred withdrawal of amount 80.000000 from account a 9 at 21:43:06.218.
+Thr2 wakes up and deducts 80.000000 from account a9 at 21:43:06.218.
+Thr3 requests for a withdrawal of amount 376.000000 from account a7 at 21:43:06.219.
+Thr3 wakes up and deducts 376.000000 from account a7 at 21:43:06.219.
+Thr5 requests for a preferred withdrawal of amount 363.000000 from account a 0 at 21:43:06.231.
+Thr5 wakes up and deducts 363.000000 from account a0 at 21:43:06.231.
+Thr1 requests for a deposit of amount 409.000000 into account a9 at 21:43:06.232.
+Thr1 enters the CS to perform a deposit of amount 409 and wakes all threads sleeping on a9 at 21:43:06.232.
+Thr2 requests for a withdrawal of amount 295.000000 from account a8 at 21:43:06.234.
+Thr2 wakes up and deducts 295.000000 from account a8 at 21:43:06.234.
+Thr1 requests for a preferred withdrawal of amount 277.000000 from account a 2 at 21:43:06.235.
+Thr1 wakes up and deducts 277.000000 from account a2 at 21:43:06.235.
+Thr3 requests for a preferred withdrawal of amount 96.000000 from account a 5 at 21:43:06.239.
+Thr3 wakes up and deducts 96.000000 from account a5 at 21:43:06.239.
+Thr1 requests for a deposit of amount 491.000000 into account a7 at 21:43:06.240.
+Thr1 enters the CS to perform a deposit of amount 491 and wakes all threads sleeping on a7 at 21:43:06.240.
+Thr4 requests for a preferred withdrawal of amount 186.000000 from account a 1 at 21:43:06.243.
+Thr4 requesting for preferred withdrawal of amount 186.000000 from account a 1 blocks at 21:43:06.243.
+Thr5 requests for a preferred withdrawal of amount 288.000000 from account a 9 at 21:43:06.253.
+Thr5 wakes up and deducts 288.000000 from account a9 at 21:43:06.253.
+Thr1 requests for a deposit of amount 331.000000 into account a3 at 21:43:06.255.
+Thr1 enters the CS to perform a deposit of amount 331 and wakes all threads sleeping on a3 at 21:43:06.255.
+Thr5 requests for a withdrawal of amount 184.000000 from account a5 at 21:43:06.258.
+Thr5 wakes up and deducts 184.000000 from account a5 at 21:43:06.258.
+Thr2 requests for a deposit of amount 343.000000 into account a9 at 21:43:06.258.
+Thr2 enters the CS to perform a deposit of amount 343 and wakes all threads sleeping on a9 at 21:43:06.258.
+Thr5 requests for a deposit of amount 371.000000 into account a3 at 21:43:06.264.
+Thr5 enters the CS to perform a deposit of amount 371 and wakes all threads sleeping on a3 at 21:43:06.264.
+Thr5 requests for a deposit of amount 402.000000 into account a9 at 21:43:06.270.
+Thr5 enters the CS to perform a deposit of amount 402 and wakes all threads sleeping on a9 at 21:43:06.271.
+Thr1 requests for a preferred withdrawal of amount 307.000000 from account a 4 at 21:43:06.278.
+Thr1 wakes up and deducts 307.000000 from account a4 at 21:43:06.278.
+Thr5 requests for a preferred withdrawal of amount 361.000000 from account a 5 at 21:43:06.280.
+Thr5 wakes up and deducts 361.000000 from account a5 at 21:43:06.280.
+Thr3 requests for a withdrawal of amount 85.000000 from account a2 at 21:43:06.281.
+Thr3 wakes up and deducts 85.000000 from account a2 at 21:43:06.281.
+Thr5 requests for a withdrawal of amount 358.000000 from account a7 at 21:43:06.287.
+Thr5 wakes up and deducts 358.000000 from account a7 at 21:43:06.287.
+Thr1 requests for a preferred withdrawal of amount 385.000000 from account a 1 at 21:43:06.288.
+Thr1 requesting for preferred withdrawal of amount 385.000000 from account a 1 blocks at 21:43:06.288.
+Thr5 requests for a deposit of amount 410.000000 into account a9 at 21:43:06.317.
+Thr5 enters the CS to perform a deposit of amount 410 and wakes all threads sleeping on a9 at 21:43:06.317.
+Thr2 requests for a withdrawal of amount 468.000000 from account a8 at 21:43:06.326.
+Thr2 requesting for withdrawal of amount 468.000000 from account a8 blocks at 21:43:06.327.
+Thr3 requests for a preferred withdrawal of amount 208.000000 from account a 0 at 21:43:06.352.
+Thr3 requesting for preferred withdrawal of amount 208.000000 from account a 0 blocks at 21:43:06.352.
