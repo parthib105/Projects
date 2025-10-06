@@ -1,7 +1,9 @@
 # Cahn-Hilliard Image Segmentation
 
 This project implements and evaluates an image segmentation model based on a modified Cahn-Hilliard (CH) partial differential equation (PDE). The model's performance is compared against classical thresholding methods (Otsu, Maximum Entropy) and the Chan-Vese level-set method across various image types, including noisy, natural, and clinical images.
+
 ---
+
 ## 📜 Proposed Model and Governing Equation
 
 The segmentation model is described by a fourth-order PDE that governs the evolution of a phase field, $u(x,t)$, which represents the segmented image.
@@ -17,7 +19,9 @@ where:
 * **$u_0(x)$**: The initial input image.
 
 The evolution starts with the image itself, $u(x,0) = u_0(x)$, and assumes homogeneous Neumann boundary conditions, ensuring no flux across the image boundaries.
+
 ---
+
 ## ⚙️ Algorithm Outline
 
 The following algorithm outlines the steps for implementing the segmentation model using convexity splitting and the Fourier spectral method.
@@ -112,6 +116,7 @@ The model was tested in four different scenarios to evaluate its robustness, ada
 * This experiment focused on segmenting blood vessels, which are typically sparse and have low contrast, comparing the CH method with Otsu thresholding.
 * **Observation**: The CH method's spatial regularization helps suppress noise and enhance the continuity of thin vessels. It produces a more accurate and visually coherent segmentation than Otsu's method alone, which can struggle with low-contrast, sparse features.
 
+---
 
 ## 🚀 Setup and Usage
 
@@ -158,6 +163,7 @@ After running an experiment, the resulting plots will be saved in the `bash resu
 ```bash
 plots are saved to: results/experiment_1/
 ```
+---
 
 ## 📚 References
 [1] R. Vijayakrishna, B. V. Rathish Kumar, and A. Halim, A PDE Based Image Segmentation Using Fourier Spectral Method, Differential Equations and Dynamical Systems, 30(2):469-484, 2018.
