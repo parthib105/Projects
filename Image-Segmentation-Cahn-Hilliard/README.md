@@ -71,15 +71,11 @@ $$
 
 b) Calculate the numerator in Fourier space:
 
-$$
-\text{Num} = \left( 1 - \Delta t C_1 M + \Delta t C_2 \right) {\widehat{U}}^k + \Delta t \left\[\frac{1}{\epsilon} \widehat{W'(U^k)} + \lambda (\widehat{u_0 - U^k}) \right\]
-$$
+$$\text{Num} = \left( 1 - \Delta t C_1 M + \Delta t C_2 \right) {\widehat{U}}^k + \Delta t \left\[\frac{1}{\epsilon} \widehat{W'\left(U^k\right)} + \lambda \left(\widehat{u_0 - U^k}\right) \right\]$$
 
 c) Update the Fourier coefficient:
 
-$$
-{\widehat{U}}^{k+1} = \frac{\text{Num}}{D}
-$$
+$${\widehat{U}}^{k+1} = \frac{\text{Num}}{D}$$
 
 d) Inverse Fourier transform ${\widehat{U}}^{k+1}$ to obtain $U^{k+1}$ in the physical space.
 
