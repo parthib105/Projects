@@ -1,6 +1,6 @@
 # Cahn-Hilliard Image Segmentation
 
-This project implements and evaluates an image segmentation model based on a modified Cahn-Hilliard (CH) partial differential equation (PDE). [cite_start]The work is based on the report "MS5033: Mesoscale Microstructure Modelling" from the Indian Institute of Technology Hyderabad[cite: 1, 3, 4]. The model's performance is compared against classical thresholding methods (Otsu, Maximum Entropy) and the Chan-Vese level-set method across various image types, including noisy, natural, and clinical images.
+This project implements and evaluates an image segmentation model based on a modified Cahn-Hilliard (CH) partial differential equation (PDE). The model's performance is compared against classical thresholding methods (Otsu, Maximum Entropy) and the Chan-Vese level-set method across various image types, including noisy, natural, and clinical images.
 
 ## 📜 Proposed Model and Governing Equation
 
