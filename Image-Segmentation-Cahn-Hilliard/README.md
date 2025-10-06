@@ -48,7 +48,7 @@ a) Define a rectangular grid of size $m \times n$.
 b) Compute the Fourier symbol $M_{i,j}$ using:
 
 $$
-M_{i,j} = \frac{2}{\Delta x^2} \left[ \cos\left( \frac{2\pi i}{m} \right) - 1 \right] + \frac{2}{\Delta y^2} \left[ \cos\left( \frac{2\pi j}{n} \right) - 1 \right]
+M_{i,j} = \frac{2}{\Delta x^2} \left\[\cos\left( \frac{2\pi i}{m} \right) - 1 \right\] + \frac{2}{\Delta y^2} \left\[\cos\left( \frac{2\pi j}{n} \right) - 1 \right\]
 $$
 
 ### Step 4: Initialization
