@@ -53,7 +53,7 @@ $$
 
 ### Step 4: Initialization
 a) Set $U^0 = u_0$.  
-b) Compute the discrete Fourier transform $\hat{U}^{0}$ of ${U}^{0}$.  
+b) Compute the discrete Fourier transform ${\widehat{U}}^{0}$ of ${U}^{0}$.  
 c) Precompute the denominator in Fourier space:
 
 $$
@@ -72,16 +72,16 @@ $$
 b) Calculate the numerator in Fourier space:
 
 $$
-\text{Num} = \left( 1 - \Delta t C_1 M + \Delta t C_2 \right) \widehat{U}^k + \Delta t \left[\frac{1}{\epsilon} \widehat{W'(U^k)} + \lambda (\widehat{u_0 - U^k}) \right]
+\text{Num} = \left( 1 - \Delta t C_1 M + \Delta t C_2 \right) {\widehat{U}}^k + \Delta t \left[\frac{1}{\epsilon} \widehat{W'(U^k)} + \lambda (\widehat{u_0 - U^k}) \right]
 $$
 
 c) Update the Fourier coefficient:
 
 $$
-\widehat{U}^{k+1} = \frac{\text{Num}}{D}
+{\widehat{U}}^{k+1} = \frac{\text{Num}}{D}
 $$
 
-d) Inverse Fourier transform $\widehat{U}^{k+1}$ to obtain $U^{k+1}$ in the physical space.
+d) Inverse Fourier transform ${\widehat{U}}^{k+1}$ to obtain $U^{k+1}$ in the physical space.
 
 ### Step 6: Stage Process
 Perform the above time-stepping for:
