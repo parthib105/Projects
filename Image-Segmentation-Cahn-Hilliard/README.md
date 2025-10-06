@@ -23,7 +23,7 @@ The evolution starts with the image itself, $u(x,0) = u_0(x)$, and assumes homog
 The following algorithm outlines the steps for implementing the segmentation model using convexity splitting and the Fourier spectral method.
 
 ### Step 1: Input
-Load the original image \( u_0(x) \).  
+Load the original image $u_0(x)$.  
 Set parameters:
 - $\epsilon$
 - $\lambda$
@@ -44,16 +44,16 @@ C_1 = \frac{3}{\epsilon}, \quad C_2 =
 $$
 
 ### Step 3: Spatial Discretization
-a) Define a rectangular grid of size $ m \times n $.  
-b) Compute the Fourier symbol $ M_{i,j} $ using:
+a) Define a rectangular grid of size $m \times n$.  
+b) Compute the Fourier symbol $M_{i,j}$ using:
 
 $$
 M_{i,j} = \frac{2}{\Delta x^2} \left[ \cos\left( \frac{2\pi i}{m} \right) - 1 \right] + \frac{2}{\Delta y^2} \left[ \cos\left( \frac{2\pi j}{n} \right) - 1 \right]
 $$
 
 ### Step 4: Initialization
-a) Set $ U^0 = u_0 $.  
-b) Compute the discrete Fourier transform $ \widehat{U}^0 $ of $ U^0 $.  
+a) Set $U^0 = u_0$.  
+b) Compute the discrete Fourier transform $\widehat{U}^0$ of ${U}^{0}$.  
 c) Precompute the denominator in Fourier space:
 
 $$
@@ -61,7 +61,7 @@ D = 1 + \Delta t \left( \epsilon M^2 - C_1 M + C_2 \right)
 $$
 
 ### Step 5: Time-Stepping Loop
-For $ k = 0, 1, 2, \ldots, N-1 $:
+For $k = 0, 1, 2, \ldots, N-1$:
 
 a) Compute the nonlinear term:
 
@@ -90,7 +90,8 @@ Perform the above time-stepping for:
 - **Stage 2**: Use the output of Stage 1 as the initial condition with parameters $(\epsilon, \lambda) = (0.001, 0)$ for further iterations.
 
 ### Step 7: Output
-The final solution $ U $ represents the segmented image.
+The final solution $U$ represents the segmented image.
+
 --- 
 ## 🧪 Experiments and Observations
 
