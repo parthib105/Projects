@@ -53,7 +53,7 @@ $$
 
 ### Step 4: Initialization
 a) Set $U^0 = u_0$.  
-b) Compute the discrete Fourier transform $\widehat{U}^0$ of ${U}^{0}$.  
+b) Compute the discrete Fourier transform $\hat{U}^{0}$ of ${U}^{0}$.  
 c) Precompute the denominator in Fourier space:
 
 $$
