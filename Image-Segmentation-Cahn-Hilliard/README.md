@@ -48,8 +48,8 @@ Follow these steps to set up the environment and run the experiments.
 
 ### **1. Clone the Repository**
 ```bash
-git clone <your-repository-url>
-cd CahnHilliard_Segmentation
+git clone https://github.com/parthib105/Projects.git
+cd Image-Segmentation-Cahn-Hilliard
 ```
 
 ### **2. Set up a Virtual Environment (Recommended)**
