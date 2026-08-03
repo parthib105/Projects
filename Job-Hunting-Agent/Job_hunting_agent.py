@@ -17,7 +17,7 @@ logger = get_logger(__name__)
 
 if __name__ == "__main__":
     # Using a raw string (r"...") or forward slashes is safer for file paths on Windows
-    resume_file = r".\database\Parthib_CV_for_ML.pdf"
+    resume_file = r"./database/Parthib_CV_for_ML.pdf"
     inputs = {"resume_path": resume_file}
 
     final_state = app.invoke(inputs)
