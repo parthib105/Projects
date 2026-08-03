@@ -1,7 +1,16 @@
+# Resume Parsing
 PyPDF2==3.0.1
-python-dotenv==1.0.0
-langgraph==0.0.69
-langchain-google-genai==1.0.10
-langchain-tavily==0.1.1
-langchain-core==0.2.38
-typing-extensions==4.9.0
+python-docx>=1.1.0
+
+# Environment & Config
+python-dotenv>=1.0.0
+typing-extensions>=4.9.0
+
+# LLM & Workflow
+# Note: langchain-core is installed automatically as a dependency of these packages.
+langgraph
+langchain-google-genai
+langchain-tavily
+
+# Reliability
+tenacity>=8.2.0

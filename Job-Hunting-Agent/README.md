@@ -12,7 +12,7 @@ An intelligent job search agent that analyzes your resume and automatically find
 
 ## Prerequisites
 
-- Python 3.8+
+- Python 3.11+
 - Google API Key (for Gemini AI)
 - Tavily API Key (for web search)
 

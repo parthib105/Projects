@@ -196,16 +196,15 @@ class Config:
         """
         return """# Job Hunting Agent Configuration
     
+            # Copy this template to .env and fill in your API keys
 
-# Copy this template to .env and fill in your API keys
+            # Required API Keys
+            GOOGLE_API_KEY=your_google_api_key_here
+            TAVILY_API_KEY=your_tavily_api_key_here
 
-# Required API Keys
-GOOGLE_API_KEY=your_google_api_key_here
-TAVILY_API_KEY=your_tavily_api_key_here
-
-# Optional Settings (with defaults)
-LLM_TEMPERATURE=0.6
-MAX_SEARCH_RESULTS=5
-LLM_MODEL=gemini-2.5-pro
-LOG_LEVEL=INFO
-"""
+            # Optional Settings (with defaults)
+            LLM_TEMPERATURE=0.6
+            MAX_SEARCH_RESULTS=5
+            LLM_MODEL=gemini-2.5-pro
+            LOG_LEVEL=INFO
+        """
