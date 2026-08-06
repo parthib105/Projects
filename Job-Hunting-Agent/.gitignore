@@ -23,3 +23,6 @@ database/
 # llm guides
 *GUIDE.md
 list_models.py
+
+# Test cases
+test/

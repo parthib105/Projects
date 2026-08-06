@@ -5,6 +5,9 @@ Uses the Gemini LLM to filter and rank job listings against
 the user's resume.
 """
 
+import logging
+from tenacity import retry, stop_after_attempt, wait_exponential, before_sleep_log, retry_if_not_exception_type
+
 from typing import Dict
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -17,6 +20,12 @@ from utils.logging_config import get_logger
 logger = get_logger(__name__)
 
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    retry=retry_if_not_exception_type((ValueError, KeyError, TypeError)),
+    before_sleep=before_sleep_log(logger, logging.WARNING)
+)
 def filter_and_rank_jobs(state: AgentState) -> Dict[str, str]:
     """Uses Gemini to filter and rank the found job listings against the resume.
 

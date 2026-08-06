@@ -5,6 +5,9 @@ Searches for job listings online using the Tavily Search API.
 This module will be replaced with a local database query in Phase 2.
 """
 
+import logging
+from tenacity import retry, stop_after_attempt, wait_exponential, before_sleep_log, retry_if_not_exception_type
+
 from typing import Dict, List, Any
 
 from core.state import AgentState
@@ -14,6 +17,12 @@ from utils.logging_config import get_logger
 logger = get_logger(__name__)
 
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    retry=retry_if_not_exception_type((ValueError, KeyError, TypeError)),
+    before_sleep=before_sleep_log(logger, logging.WARNING)
+)
 def search_for_jobs(state: AgentState) -> Dict[str, Any]:
     """Searches for jobs online using Tavily Search.
 
@@ -66,8 +75,9 @@ def search_for_jobs(state: AgentState) -> Dict[str, Any]:
                     })
 
         except Exception as e:
-            logger.error("Error searching for '%s': %s", query, str(e))
-            continue
+            # Re-raise so tenacity can catch it and retry if it's a network issue
+            logger.error("API error while searching for '%s', triggering retry if applicable...", query)
+            raise
 
     # If no results found, create some fallback results
     if not all_results:

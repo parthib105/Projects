@@ -5,6 +5,9 @@ Uses the Gemini LLM to generate diverse job search queries
 based on the parsed resume text.
 """
 
+import logging
+from tenacity import retry, stop_after_attempt, wait_exponential, before_sleep_log, retry_if_not_exception_type
+
 from typing import Dict, Any, List
 from pydantic import BaseModel, Field
 
@@ -23,6 +26,12 @@ class JobSearchQueries(BaseModel):
     )
 
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    retry=retry_if_not_exception_type((ValueError, KeyError, TypeError)),
+    before_sleep=before_sleep_log(logger, logging.WARNING)
+)
 def generate_search_queries(state: AgentState) -> Dict[str, Any]:
     """Generates job search queries using Gemini based on resume text.
 
