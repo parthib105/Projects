@@ -19,9 +19,16 @@ from utils.logging_config import setup_logging
 config = Config()
 setup_logging(level=config.log_level)
 
-# ── LLM ──
+# ── Fast LLM (for query generation & filtering) ──
 llm = ChatGoogleGenerativeAI(
     model=config.llm_model,
+    temperature=config.llm_temperature,
+    google_api_key=config.google_api_key,
+)
+
+# ── Reasoning LLM (for deep evaluation & ranking) ──
+reasoning_llm = ChatGoogleGenerativeAI(
+    model=config.reasoning_llm_model,
     temperature=config.llm_temperature,
     google_api_key=config.google_api_key,
 )

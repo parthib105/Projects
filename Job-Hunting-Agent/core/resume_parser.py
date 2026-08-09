@@ -7,11 +7,10 @@ which ensures compatibility with future FastAPI endpoints.
 """
 
 import io
-import re
 import os
-import pypdf
+import re
 import docx
-from typing import Dict
+import pypdf
 
 from core.state import AgentState
 from utils.logging_config import get_logger
@@ -20,11 +19,11 @@ logger = get_logger(__name__)
 
 
 def clean_text(text: str) -> str:
-    """Removes excessive whitespace and unprintable characters to save LLM tokens."""
-    # Remove non-ascii characters and weird unicode spaces
-    text = text.encode("ascii", "ignore").decode()
-    # Replace multiple spaces/newlines with a single space
-    text = re.sub(r'\s+', ' ', text)
+    """Removes excessive whitespace while preserving Unicode characters and newlines."""
+    # Normalize horizontal spaces/tabs without stripping non-ASCII characters
+    text = re.sub(r'[ \t]+', ' ', text)
+    # Collapse 3+ consecutive newlines into double newlines for paragraph breaks
+    text = re.sub(r'\n{3,}', '\n\n', text)
     return text.strip()
 
 
@@ -55,7 +54,7 @@ def parse_resume_from_bytes(file_bytes: bytes, filename: str) -> str:
         doc = docx.Document(file_obj)
         text = "\n".join([para.text for para in doc.paragraphs])
     elif ext == ".txt":
-        text = file_bytes.decode("utf-8")
+        text = file_bytes.decode("utf-8", errors="replace")
     else:
         raise ValueError(f"Unsupported file extension: {ext}. Expected .pdf, .docx, or .txt")
 
@@ -65,7 +64,7 @@ def parse_resume_from_bytes(file_bytes: bytes, filename: str) -> str:
     return clean_text(text)
 
 
-def parse_resume(state: AgentState) -> Dict[str, str]:
+def parse_resume(state: AgentState) -> dict[str, str]:
     """Parses the resume file from disk (LangGraph node).
 
     Args:
@@ -76,18 +75,18 @@ def parse_resume(state: AgentState) -> Dict[str, str]:
     """
     logger.info("NODE: PARSING RESUME")
     path = state.resume_path
-    
+
     if not os.path.exists(path):
         logger.error("Resume file not found at path: %s", path)
         raise FileNotFoundError(f"Resume file not found at path: {path}")
 
     filename = os.path.basename(path)
-    
+
     with open(path, "rb") as f:
         file_bytes = f.read()
-        
+
     logger.info("Extracting text from %s...", filename)
     extracted_text = parse_resume_from_bytes(file_bytes, filename)
-    
+
     logger.info("Done parsing resume ✅ (Length: %d characters)", len(extracted_text))
     return {"resume_text": extracted_text}

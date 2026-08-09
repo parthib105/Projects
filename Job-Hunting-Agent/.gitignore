@@ -2,6 +2,7 @@
 __pycache__/
 **/__pycache__/
 *.py[cod]
+*cache
 *$py.class
 
 # Environments
@@ -26,3 +27,5 @@ list_models.py
 
 # Test cases
 test/
+
+IMPROVEMENT_PLAN.md
