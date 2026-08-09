@@ -23,6 +23,7 @@ def test_config_defaults(monkeypatch):
 
 def test_config_placeholder_validation(monkeypatch):
     """Test that default placeholder API keys trigger ConfigurationError."""
+    monkeypatch.setenv("SEARCH_PROVIDER", "tavily")
     monkeypatch.setenv("GOOGLE_API_KEY", "your_google_api_key_here")
     monkeypatch.setenv("TAVILY_API_KEY", "your_tavily_api_key_here")
 

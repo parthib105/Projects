@@ -1,26 +1,44 @@
 """
 Job search node for the Job Hunting Agent.
 
-Searches for job listings online using search tools and returns
-structured JobListing Pydantic models.
+Executes search queries concurrently across the configured search provider,
+deduplicates results via DeduplicationEngine, and returns structured JobListing objects.
 """
 
-import hashlib
+import asyncio
 import logging
 from typing import Any
-from tenacity import before_sleep_log, retry, retry_if_not_exception_type, stop_after_attempt, wait_exponential
 
-from core.dependencies import tavily_tool
+from tenacity import (
+    before_sleep_log,
+    retry,
+    retry_if_not_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
+
+from core.deduplicator import DeduplicationEngine
+from core.search_providers import get_search_provider
 from core.state import AgentState, JobListing
 from utils.logging_config import get_logger
 
 logger = get_logger(__name__)
 
 
-def generate_job_id(title: str, company: str, url: str) -> str:
-    """Generates a stable unique hash ID for a job listing."""
-    raw = f"{title.strip().lower()}|{company.strip().lower()}|{url.strip().lower()}"
-    return hashlib.md5(raw.encode("utf-8")).hexdigest()[:12]
+async def _execute_parallel_searches(queries: list[str]) -> list[JobListing]:
+    """Helper coroutine executing search provider tasks concurrently for all queries."""
+    provider = get_search_provider()
+    tasks = [provider.search_async(query) for query in queries]
+    results_list = await asyncio.gather(*tasks, return_exceptions=True)
+
+    all_listings: list[JobListing] = []
+    for q, res in zip(queries, results_list):
+        if isinstance(res, list):
+            all_listings.extend(res)
+        elif isinstance(res, Exception):
+            logger.warning("Error searching for query '%s': %s", q, res)
+
+    return all_listings
 
 
 @retry(
@@ -30,71 +48,31 @@ def generate_job_id(title: str, company: str, url: str) -> str:
     before_sleep=before_sleep_log(logger, logging.WARNING)
 )
 def search_for_jobs(state: AgentState) -> dict[str, Any]:
-    """Searches for jobs online and returns structured JobListing objects.
+    """Searches for jobs online asynchronously across queries and deduplicates listings.
 
     Args:
         state: Current agent state containing ``search_queries``.
 
     Returns:
-        Dict with ``job_listings`` key containing a list of JobListing objects.
+        Dict with ``job_listings`` key containing a list of deduplicated JobListing objects.
     """
-    logger.info("NODE: SEARCHING FOR JOBS")
+    logger.info("NODE: SEARCHING FOR JOBS (PARALLEL ASYNC EXECUTION)")
     queries = state.search_queries
-    job_listings: list[JobListing] = []
 
-    for query in queries:
-        logger.info("Searching for: '%s'", query)
-        try:
-            search_results = tavily_tool.invoke({"query": query})
-            logger.debug("Search results type: %s", type(search_results))
+    if not queries:
+        logger.warning("No search queries provided in state.")
+        return {"job_listings": []}
 
-            results_to_process = []
-            if isinstance(search_results, dict):
-                results_to_process = search_results.get('results', [search_results])
-            elif isinstance(search_results, list):
-                results_to_process = search_results
-            elif isinstance(search_results, str):
-                results_to_process = [{"content": search_results, "url": "N/A"}]
+    # Execute all query searches concurrently using asyncio
+    raw_listings = asyncio.run(_execute_parallel_searches(queries))
 
-            for res in results_to_process:
-                if isinstance(res, dict):
-                    content = res.get('content', res.get('snippet', ''))
-                    url = res.get('url', res.get('link', 'N/A'))
-                    title = res.get('title', 'N/A')
-                    company = res.get('company', 'Unknown')
+    # Deduplicate retrieved listings using DeduplicationEngine
+    dedup_engine = DeduplicationEngine()
+    unique_listings = dedup_engine.deduplicate(raw_listings)
 
-                    if content:
-                        job_id = generate_job_id(title, company, url)
-                        job_listings.append(
-                            JobListing(
-                                id=job_id,
-                                title=title,
-                                company=company,
-                                url=url,
-                                description=content,
-                                source="Tavily"
-                            )
-                        )
-                elif isinstance(res, str) and res.strip():
-                    job_id = generate_job_id("Job Opportunity", "Unknown", "N/A")
-                    job_listings.append(
-                        JobListing(
-                            id=job_id,
-                            title="Job Opportunity",
-                            company="Unknown",
-                            url="N/A",
-                            description=res.strip(),
-                            source="Tavily"
-                        )
-                    )
-
-        except Exception:
-            logger.error("API error while searching for '%s', triggering retry if applicable...", query)
-            raise
-
-    if not job_listings:
-        logger.warning("No results found from search tool, using fallback demo results...")
-        fallback_results = [
+    if not unique_listings:
+        logger.warning("No search results returned from provider, creating fallback demo results...")
+        unique_listings = [
             JobListing(
                 id="fallback_1",
                 title="Machine Learning Intern",
@@ -114,7 +92,6 @@ def search_for_jobs(state: AgentState) -> dict[str, Any]:
                 source="Fallback"
             )
         ]
-        job_listings = fallback_results
 
-    logger.info("Collected %d valid structured job listings ✅", len(job_listings))
-    return {"job_listings": job_listings}
+    logger.info("Collected %d unique structured job listings ✅", len(unique_listings))
+    return {"job_listings": unique_listings}

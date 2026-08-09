@@ -1,0 +1,21 @@
+Parthib Ghosh
+Senior Machine Learning Engineer & AI Developer
+Location: Remote / India
+Email: parthib@example.com
+
+SUMMARY:
+Passionate Machine Learning Engineer with 4+ years of experience building Generative AI systems, LLM agents, LangGraph orchestration workflows, and scalable Python microservices.
+
+SKILLS:
+- Languages: Python, C++, SQL, JavaScript
+- AI/ML Frameworks: PyTorch, TensorFlow, Scikit-Learn, HuggingFace, LangChain, LangGraph
+- Cloud & Infrastructure: Docker, FastApi, PostgreSQL, Redis, Linux
+- Domains: Natural Language Processing (NLP), Computer Vision, Autonomous AI Agents
+
+EXPERIENCE:
+Senior AI Engineer | AI Innovation Labs (2022 - Present)
+- Architected multi-agent RAG systems and LLM orchestration workflows using LangGraph and Python.
+- Optimized vector similarity search pipelines cutting inference latency by 40%.
+
+Machine Learning Engineer | DataTech Solutions (2020 - 2022)
+- Built NLP text classification pipelines and recommendation systems in PyTorch.

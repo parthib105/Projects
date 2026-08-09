@@ -77,6 +77,7 @@ class Config:
         self._max_search_results = int(os.getenv("MAX_SEARCH_RESULTS", "5"))
         self._llm_model = os.getenv("LLM_MODEL", "gemini-2.0-flash")
         self._reasoning_llm_model = os.getenv("REASONING_LLM_MODEL", "gemini-1.5-pro")
+        self._search_provider = os.getenv("SEARCH_PROVIDER", "duckduckgo").lower()
 
         # Logging level
         self._log_level = os.getenv("LOG_LEVEL", "INFO").upper()
@@ -156,6 +157,16 @@ class Config:
         return self._reasoning_llm_model
 
     @property
+    def search_provider(self) -> str:
+        """
+        Get the configured search provider name.
+
+        Returns:
+            str: Search provider name ('duckduckgo', 'tavily', 'adzuna', 'serpapi')
+        """
+        return self._search_provider
+
+    @property
     def log_level(self) -> str:
         """
         Get the logging level.
@@ -174,16 +185,22 @@ class Config:
         """
         errors = []
 
-        # Validate required API keys
+        # Validate search provider and required API keys
+        valid_providers = {"duckduckgo", "tavily", "adzuna", "serpapi"}
+        if self._search_provider not in valid_providers:
+            errors.append(
+                f"SEARCH_PROVIDER must be one of {valid_providers}, got '{self._search_provider}'"
+            )
+
         if not self._google_api_key or self._google_api_key == "your_google_api_key_here":
             errors.append(
                 "GOOGLE_API_KEY environment variable is required. "
                 "Get your API key from https://makersuite.google.com/app/apikey"
             )
 
-        if not self._tavily_api_key or self._tavily_api_key == "your_tavily_api_key_here":
+        if self._search_provider == "tavily" and (not self._tavily_api_key or self._tavily_api_key == "your_tavily_api_key_here"):
             errors.append(
-                "TAVILY_API_KEY environment variable is required. "
+                "TAVILY_API_KEY environment variable is required when SEARCH_PROVIDER is 'tavily'. "
                 "Get your API key from https://tavily.com/"
             )
 
