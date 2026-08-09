@@ -18,9 +18,6 @@ venv.bak/
 .vscode/
 .idea/
 
-# Distribution / packaging
-database/
-
 # llm guides
 *GUIDE.md
 list_models.py

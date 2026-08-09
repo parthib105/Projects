@@ -93,5 +93,9 @@ def search_for_jobs(state: AgentState) -> dict[str, Any]:
             )
         ]
 
+    # Persist unique listings to SQLite database
+    from database.manager import db
+    db.save_job_listings(unique_listings)
+
     logger.info("Collected %d unique structured job listings ✅", len(unique_listings))
     return {"job_listings": unique_listings}

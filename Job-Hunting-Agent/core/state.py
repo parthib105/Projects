@@ -51,6 +51,15 @@ class RankedJobList(BaseModel):
     summary: str = Field(default="", description="Executive summary of ranking results")
 
 
+class ApplicationMaterials(BaseModel):
+    """Tailored resume bullets and cover letter generated for top job match."""
+    job_id: str = Field(description="Target job match ID")
+    job_title: str = Field(description="Target job title")
+    company: str = Field(description="Hiring company name")
+    tailored_bullets: list[str] = Field(default_factory=list, description="3-5 tailored resume bullet points highlighting relevant achievements")
+    cover_letter: str = Field(description="Professional tailored cover letter formatted for application")
+
+
 class AgentState(BaseModel):
     """Shared state flowing through the LangGraph workflow.
 
@@ -62,6 +71,7 @@ class AgentState(BaseModel):
         job_listings: Structured list of retrieved job postings.
         ranked_matches: Structured list of evaluated and ranked job matches.
         ranked_jobs: Plain-text summary for backwards compatibility.
+        application_materials: Tailored resume bullets and cover letter.
     """
     resume_path: str = Field(default="")
     resume_text: str = Field(default="")
@@ -70,4 +80,5 @@ class AgentState(BaseModel):
     job_listings: list[JobListing] = Field(default_factory=list)
     ranked_matches: list[JobMatchAnalysis] = Field(default_factory=list)
     ranked_jobs: str = Field(default="", description="Plain-text summary for CLI output compatibility")
+    application_materials: ApplicationMaterials | None = Field(default=None, description="Tailored application materials for top job match")
 

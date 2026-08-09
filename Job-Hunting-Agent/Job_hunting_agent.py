@@ -23,12 +23,22 @@ if __name__ == "__main__":
     if not os.path.exists(resume_file):
         resume_file = "sample_resume.txt"
 
-    inputs = {"resume_path": resume_file}
-
-    final_state = app.invoke(inputs)
+    config = {"configurable": {"thread_id": "session_1"}}
+    final_state = app.invoke(inputs, config=config)
 
     logger.info("JOB SEARCH COMPLETE ✅")
     print("\n" + "=" * 70)
     print("RANKED JOB MATCHES & SUMMARY:")
     print("=" * 70)
-    print(final_state["ranked_jobs"])
+    print(final_state.get("ranked_jobs", ""))
+
+    materials = final_state.get("application_materials")
+    if materials:
+        print("\n" + "=" * 70)
+        print(f"TAILORED APPLICATION MATERIALS FOR TOP MATCH ({materials.job_title} at {materials.company}):")
+        print("=" * 70)
+        print("\n--- Tailored Resume Bullets ---")
+        for bullet in materials.tailored_bullets:
+            print(f"• {bullet}")
+        print("\n--- Customized Cover Letter ---")
+        print(materials.cover_letter)
