@@ -7,10 +7,16 @@ based on the parsed resume text and user preferences.
 
 import logging
 from typing import Any
-from pydantic import BaseModel, Field
-from tenacity import before_sleep_log, retry, retry_if_not_exception_type, stop_after_attempt, wait_exponential
 
 from langchain_core.prompts import ChatPromptTemplate
+from pydantic import BaseModel, Field
+from tenacity import (
+    before_sleep_log,
+    retry,
+    retry_if_not_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from core.dependencies import llm
 from core.state import AgentState
@@ -62,11 +68,24 @@ Candidate Preferences:
 {preferences}"""
     )
 
-    structured_llm = llm.with_structured_output(JobSearchQueries)
-    chain = prompt | structured_llm
+    try:
+        structured_llm = llm.with_structured_output(JobSearchQueries)
+        chain = prompt | structured_llm
+        result = chain.invoke({"resume": resume_text, "preferences": pref_details or "Standard candidate preferences."})
+        queries_list = result.queries
+    except Exception as e:  # noqa: BLE001
+        logger.warning("LLM query generation encountered an error: %s. Using fallback query generator.", e)
+        roles = prefs.target_roles or ["Machine Learning Engineer", "AI Developer"]
+        locations = prefs.preferred_locations or ["Remote"]
+        loc_str = locations[0] if locations else "Remote"
 
-    result = chain.invoke({"resume": resume_text, "preferences": pref_details or "Standard candidate preferences."})
-    queries_list = result.queries
+        queries_list = []
+        for role in roles:
+            queries_list.extend([
+                f"{role} {loc_str} job openings requirements",
+                f"Senior {role} hiring qualifications apply",
+                f"{role} software engineer career opportunity"
+            ])
 
     logger.info("Done generating search queries ✅ — %d queries", len(queries_list))
     return {"search_queries": queries_list}

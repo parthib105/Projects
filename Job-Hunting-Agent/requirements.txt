@@ -12,5 +12,7 @@ langgraph
 langchain-google-genai
 langchain-tavily
 
-# Reliability
+# Reliability & UI
 tenacity>=8.2.0
+rich>=13.0.0
+ddgs>=6.0.0

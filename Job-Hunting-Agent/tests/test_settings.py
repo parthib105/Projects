@@ -11,6 +11,8 @@ def test_config_defaults(monkeypatch):
     """Test that default values are populated correctly when environment variables are valid."""
     monkeypatch.setenv("GOOGLE_API_KEY", "valid_google_key")
     monkeypatch.setenv("TAVILY_API_KEY", "valid_tavily_key")
+    monkeypatch.setenv("LLM_MODEL", "gemini-2.0-flash")
+    monkeypatch.setenv("REASONING_LLM_MODEL", "gemini-1.5-pro")
 
     cfg = Config()
     assert cfg.google_api_key == "valid_google_key"
