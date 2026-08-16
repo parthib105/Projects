@@ -12,7 +12,11 @@ langgraph
 langchain-google-genai
 langchain-tavily
 
-# Reliability & UI
+# Reliability, Web UI & REST API
 tenacity>=8.2.0
 rich>=13.0.0
 ddgs>=6.0.0
+fastapi>=0.110.0
+uvicorn>=0.28.0
+python-multipart>=0.0.9
+streamlit>=1.32.0

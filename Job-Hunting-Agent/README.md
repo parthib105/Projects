@@ -1,6 +1,6 @@
 # Job Hunting Agent — Executive AI Career Assistant
 
-An enterprise-grade, high-performance **AI Job Search & Application Orchestration Engine** built with Python, **LangGraph**, **Google Gemini LLM**, **DuckDuckGo Search**, **SQLite**, **Semantic Vector Matching**, and **Rich Terminal UI**.
+An enterprise-grade, high-performance **AI Job Search & Application Orchestration Engine** built with Python, **LangGraph**, **Google Gemini LLM**, **DuckDuckGo Search**, **FastAPI REST Gateway**, **Streamlit Web Dashboard**, **SQLite**, **Semantic Vector Matching**, and **Rich Terminal UI**.
 
 ---
 
@@ -29,10 +29,15 @@ An enterprise-grade, high-performance **AI Job Search & Application Orchestratio
 - **Dedicated Database Package (`database/manager.py`)**: Manages SQLite storage for cached job listings, user search preferences, match evaluation history, and tailored application materials.
 - **LangGraph Memory Checkpointing**: Integrated `MemorySaver` into `workflow.compile()` for thread-based state persistence, execution tracking, and workflow resumption.
 
-### 🎨 Phase 5: Semantic Vector Search, Production Rich CLI & Export Engine
+### 🎨 Phase 5: Modern Web UI, REST API Gateway & Autonomous Monitoring
+- **Interactive Web Dashboard (`app.py`)**: Sleek Streamlit web UI with candidate resume drag-and-drop, search filter controls, interactive job match cards with skill pill badges, cover letter viewer, and Markdown file downloader.
+- **RESTful API Gateway (`api.py`)**: Async FastAPI service exposing REST endpoints:
+  - `POST /api/v1/resume/parse`: Upload PDF/DOCX/TXT resume and return extracted candidate profile.
+  - `POST /api/v1/jobs/search`: Run full LangGraph job search workflow.
+  - `GET /api/v1/jobs/applications`: Retrieve tracked job applications.
+  - `POST /api/v1/applications/tailor`: Generate tailored cover letter & resume bullets for a specific job ID.
 - **Semantic Vector Search Engine (`VectorSearchEngine`)**: Uses cosine similarity math between candidate resume embeddings and job vectors to uncover domain matches even when exact query keywords differ (with pure Python text similarity fallback).
-- **Interactive Rich CLI (`cli.py`)**: Styled terminal interface with live status spinners, colored panels, and formatted `rich.table.Table` output.
-- **Human-in-the-Loop Review & Export**: Interactively prompts candidates to review top matches and exports tailored application materials to Markdown files under `exports/`.
+- **Interactive Rich CLI (`cli.py`)**: Styled terminal interface with live status spinners, colored panels, formatted tables, and Markdown export engine.
 
 ---
 
@@ -40,6 +45,8 @@ An enterprise-grade, high-performance **AI Job Search & Application Orchestratio
 
 ```
 Job-Hunting-Agent/
+├── app.py                  # Streamlit Interactive Web Dashboard
+├── api.py                  # FastAPI RESTful API Gateway
 ├── cli.py                  # Production Interactive Rich CLI Entry Point
 ├── Job_hunting_agent.py    # Backwards-compatible CLI script
 ├── sample_resume.txt       # Sample candidate resume for testing
@@ -67,7 +74,7 @@ Job-Hunting-Agent/
 │   ├── job_hunting_agent.db# Local SQLite database file
 │   └── __init__.py
 ├── exports/                # Generated Markdown application materials
-├── tests/                  # 23 Automated pytest unit tests (100% pass rate)
+├── tests/                  # 26 Automated pytest unit tests (100% pass rate)
 └── utils/
     └── logging_config.py   # Centralized logger setup
 ```
@@ -109,38 +116,45 @@ Job-Hunting-Agent/
 
 ---
 
-## 🚀 Quick Start & Usage
+## 🚀 Quick Start & Launch Instructions
 
-### 1. Interactive CLI Mode (Recommended)
-Run the interactive terminal prompter:
+### 1. Launch Interactive Web Dashboard
+Run the Streamlit web application:
+```bash
+streamlit run app.py
+```
+Open `http://localhost:8501` in your browser to drag-and-drop resumes, adjust search filters, view job cards, and download cover letters.
+
+### 2. Launch FastAPI REST Gateway
+Run the async REST API service with Uvicorn:
+```bash
+uvicorn api:api_app --reload --port 8000
+```
+Open `http://localhost:8000/docs` to view Swagger UI documentation and test endpoints interactively.
+
+### 3. Interactive CLI Mode
+Run the rich terminal prompter:
 ```bash
 python cli.py
 ```
-You will be prompted for your resume path, target roles, preferred locations, remote choices, and search provider preference.
 
-### 2. Command-Line Flag Mode (Non-Interactive)
+### 4. Non-Interactive Flag Mode with Export
 Run with CLI flags and automatic Markdown export:
 ```bash
 python cli.py --non-interactive --resume sample_resume.txt --provider duckduckgo --export
-```
-
-### 3. Backwards-Compatible Execution
-Run the simple CLI script:
-```bash
-python Job_hunting_agent.py
 ```
 
 ---
 
 ## 🧪 Automated Testing Suite
 
-Run the full automated `pytest` suite covering configuration settings, resume parsing, deduplication, search providers, vector similarity, SQLite storage, and CLI exports:
+Run the full automated `pytest` suite covering configuration settings, resume parsing, deduplication, search providers, vector similarity, SQLite storage, CLI exports, and FastAPI endpoints:
 
 ```bash
 pytest -v
 ```
 
-**Test Status**: **23 out of 23 unit tests passing (100% Pass Rate)** ✅
+**Test Status**: **26 out of 26 unit tests passing (100% Pass Rate)** ✅
 
 ---
 
