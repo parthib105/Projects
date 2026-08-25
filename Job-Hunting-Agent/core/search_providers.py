@@ -8,6 +8,7 @@ with async support for concurrent query execution and native content retrieval.
 import abc
 import asyncio
 import hashlib
+import os
 import re
 
 from core.dependencies import config, tavily_tool
@@ -153,6 +154,85 @@ class TavilySearchProvider(BaseSearchProvider):
         return listings
 
 
+class AdzunaSearchProvider(BaseSearchProvider):
+    """Free structured job search API from Adzuna."""
+
+    def __init__(self):
+        super().__init__(provider_name="Adzuna")
+        self.app_id = os.getenv("ADZUNA_APP_ID")
+        self.app_key = os.getenv("ADZUNA_APP_KEY")
+        if not self.app_id or not self.app_key:
+            logger.warning("Adzuna API credentials not found. Set ADZUNA_APP_ID and ADZUNA_APP_KEY.")
+
+    async def search_async(self, query: str, max_results: int = 5) -> list[JobListing]:
+        """Executes an Adzuna job search asynchronously."""
+        if not self.app_id or not self.app_key:
+            logger.warning("Adzuna credentials missing, returning empty results")
+            return []
+
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, self._sync_search, query, max_results)
+
+    def _sync_search(self, query: str, max_results: int) -> list[JobListing]:
+        """Sync implementation of Adzuna search."""
+        listings = []
+        try:
+            # Adzuna API endpoint (example for US - adjust for other countries)
+            country = "us"  # Could be made configurable
+            url = f"http://api.adzuna.com/v1/api/jobs/{country}/search/1"
+
+            params = {
+                'app_id': self.app_id,
+                'app_key': self.app_key,
+                'results_per_page': min(max_results, 50),  # Adzuna max is 50
+                'what': query,
+                'content-type': 'application/json'
+            }
+
+            import requests
+            response = requests.get(url, params=params, timeout=10)
+
+            if response.status_code == 200:
+                data = response.json()
+                results = data.get('results', [])
+
+                for res in results:
+                    title = res.get('title', 'N/A')
+                    company = res.get('company', {}).get('display_name', 'Unknown')
+                    location = res.get('location', {}).get('display_area', 'Unknown')
+                    url = res.get('redirect_url', 'N/A')
+                    description = res.get('description', '')
+                    salary_min = res.get('salary_min')
+                    salary_max = res.get('salary_max')
+
+                    # Enhance description with salary info if available
+                    if salary_min and salary_max:
+                        description += f"\n\nSalary: ${salary_min:,.0f} - ${salary_max:,.0f}"
+                    elif salary_min:
+                        description += f"\n\nSalary: ${salary_min:,.0f}+"
+
+                    if description:
+                        job_id = generate_job_id(title, company, url)
+                        listings.append(
+                            JobListing(
+                                id=job_id,
+                                title=title,
+                                company=company,
+                                location=location,
+                                url=url,
+                                description=description,
+                                source="Adzuna"
+                            )
+                        )
+            else:
+                logger.warning(f"Adzuna API error: {response.status_code} - {response.text}")
+
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Adzuna search error for query '{query}': {e}")
+
+        return listings
+
+
 def get_search_provider(provider_name: str | None = None) -> BaseSearchProvider:
     """Factory function returning the configured search provider instance.
 
@@ -162,7 +242,6 @@ def get_search_provider(provider_name: str | None = None) -> BaseSearchProvider:
     Returns:
         BaseSearchProvider: Configured search provider instance.
     """
-    import os
     selected_name = provider_name or os.getenv("SEARCH_PROVIDER", config.search_provider)
     name = selected_name.lower()
 
@@ -172,6 +251,9 @@ def get_search_provider(provider_name: str | None = None) -> BaseSearchProvider:
     elif name == "tavily":
         logger.info("Initializing search provider: Tavily API")
         return TavilySearchProvider()
+    elif name == "adzuna":
+        logger.info("Initializing search provider: Adzuna (Structured Job API)")
+        return AdzunaSearchProvider()
     else:
         logger.warning("Unknown search provider '%s', defaulting to DuckDuckGo", name)
         return DuckDuckGoSearchProvider()

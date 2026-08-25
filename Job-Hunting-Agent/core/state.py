@@ -72,6 +72,7 @@ class AgentState(BaseModel):
         ranked_matches: Structured list of evaluated and ranked job matches.
         ranked_jobs: Plain-text summary for backwards compatibility.
         application_materials: Tailored resume bullets and cover letter.
+        professional_terms: Extracted professional/technical terms from the resume.
     """
     resume_path: str = Field(default="")
     resume_text: str = Field(default="")
@@ -81,4 +82,5 @@ class AgentState(BaseModel):
     ranked_matches: list[JobMatchAnalysis] = Field(default_factory=list)
     ranked_jobs: str = Field(default="", description="Plain-text summary for CLI output compatibility")
     application_materials: ApplicationMaterials | None = Field(default=None, description="Tailored application materials for top job match")
+    professional_terms: list[str] = Field(default_factory=list, description="Extracted professional/technical terms from the resume")
 

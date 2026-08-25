@@ -71,6 +71,9 @@ class Config:
         # Required API keys
         self._google_api_key = os.getenv("GOOGLE_API_KEY")
         self._tavily_api_key = os.getenv("TAVILY_API_KEY")
+        # Adzuna API keys (optional, only required if using adzuna provider)
+        self._adzuna_app_id = os.getenv("ADZUNA_APP_ID")
+        self._adzuna_app_key = os.getenv("ADZUNA_APP_KEY")
 
         # Optional settings with defaults
         self._llm_temperature = float(os.getenv("LLM_TEMPERATURE", "0.6"))
@@ -176,6 +179,26 @@ class Config:
         """
         return self._log_level
 
+    @property
+    def adzuna_app_id(self) -> str | None:
+        """
+        Get the Adzuna App ID API key.
+
+        Returns:
+            str: The Adzuna App ID, or None if not configured
+        """
+        return self._adzuna_app_id
+
+    @property
+    def adzuna_app_key(self) -> str | None:
+        """
+        Get the Adzuna App Key API key.
+
+        Returns:
+            str: The Adzuna App Key, or None if not configured
+        """
+        return self._adzuna_app_key
+
     def validate_config(self) -> None:
         """
         Validate all configuration settings.
@@ -186,7 +209,7 @@ class Config:
         errors = []
 
         # Validate search provider and required API keys
-        valid_providers = {"duckduckgo", "tavily", "adzuna", "serpapi"}
+        valid_providers ={"duckduckgo", "tavily", "adzuna", "serpapi"}
         if self._search_provider not in valid_providers:
             errors.append(
                 f"SEARCH_PROVIDER must be one of {valid_providers}, got '{self._search_provider}'"
@@ -202,6 +225,17 @@ class Config:
             errors.append(
                 "TAVILY_API_KEY environment variable is required when SEARCH_PROVIDER is 'tavily'. "
                 "Get your API key from https://tavily.com/"
+            )
+
+        if self._search_provider == "adzuna" and (not self._adzuna_app_id or self._adzuna_app_id == "your_adzuna_app_id_here"):
+            errors.append(
+                "ADZUNA_APP_ID environment variable is required when SEARCH_PROVIDER is 'adzuna'. "
+                "Get your credentials from https://developer.adzuna.com/"
+            )
+        if self._search_provider == "adzuna" and (not self._adzuna_app_key or self._adzuna_app_key == "your_adzuna_app_key_here"):
+            errors.append(
+                "ADZUNA_APP_KEY environment variable is required when SEARCH_PROVIDER is 'adzuna'. "
+                "Get your credentials from https://developer.adzuna.com/"
             )
 
         # Validate temperature range

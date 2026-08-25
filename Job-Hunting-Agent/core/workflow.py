@@ -14,6 +14,7 @@ from core.query_generator import generate_search_queries
 from core.resume_parser import parse_resume
 from core.state import AgentState
 from core.tailor import tailor_application
+from core.term_extractor import extract_terms_node
 from utils.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -23,6 +24,7 @@ workflow = StateGraph(AgentState)
 
 # Add nodes
 workflow.add_node("parse_resume", parse_resume)
+workflow.add_node("extract_terms", extract_terms_node)
 workflow.add_node("generate_queries", generate_search_queries)
 workflow.add_node("search_jobs", search_for_jobs)
 workflow.add_node("rank_jobs", filter_and_rank_jobs)
@@ -30,7 +32,8 @@ workflow.add_node("tailor_application", tailor_application)
 
 # Define edges (the flow of control)
 workflow.set_entry_point("parse_resume")
-workflow.add_edge("parse_resume", "generate_queries")
+workflow.add_edge("parse_resume", "extract_terms")
+workflow.add_edge("extract_terms", "generate_queries")
 workflow.add_edge("generate_queries", "search_jobs")
 workflow.add_edge("search_jobs", "rank_jobs")
 workflow.add_edge("rank_jobs", "tailor_application")

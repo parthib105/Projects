@@ -27,6 +27,89 @@ logger = get_logger(__name__)
 BATCH_SIZE = 5
 
 
+def extract_domain_indicators(text: str) -> dict[str, int]:
+    """Extract domain-specific indicators from text using keyword categories.
+    Returns a dictionary of domain scores.
+    """
+    # Define domain categories with associated keywords
+    # This can be extended/customized based on observed resume/job patterns
+    domain_keywords = {
+        'healthcare': {
+            'patient', 'clinical', 'therapy', 'rehabilitation', 'medical', 'healthcare',
+            'physiotherapy', 'physician', 'nurse', 'hospital', 'clinic', 'diagnosis',
+            'treatment', 'care', 'pharmacy', 'health', 'wellness'
+        },
+        'technology': {
+            'software', 'programming', 'developer', 'engineer', 'algorithm', 'database',
+            'web', 'mobile', 'api', 'framework', 'language', 'python', 'java', 'javascript',
+            'sql', 'cloud', 'devops', 'agile', 'scrum', 'data', 'system', 'IT'
+        },
+        'business': {
+            'management', 'marketing', 'sales', 'finance', 'accounting', 'hr', 'human resources',
+            'strategy', 'operations', 'consulting', 'business', 'administration', 'project'
+        },
+        'creative': {
+            'design', 'art', 'graphic', 'content', 'writing', 'copy', 'creative', 'media',
+            'advertising', 'brand', 'visual', 'ux', 'ui', 'multimedia'
+        },
+        'education': {
+            'teaching', 'education', 'training', 'curriculum', 'instruction', 'academic',
+            'student', 'faculty', 'research', 'learning', 'course'
+        },
+        'engineering': {
+            'engineering', 'mechanical', 'electrical', 'civil', 'chemical', 'manufacturing',
+            'industrial', 'robotics', 'automotive', 'aerospace', 'construction'
+        }
+        # Add more domains as needed
+    }
+
+    text_lower = text.lower()
+    domain_scores = {}
+
+    for domain, keywords in domain_keywords.items():
+        score = sum(1 for keyword in keywords if keyword in text_lower)
+        domain_scores[domain] = score
+
+    return domain_scores
+
+
+def calculate_generic_domain_penalty(resume_text: str, job_description: str) -> float:
+    """Calculate penalty score (0.0 to 1.0) for domain mismatch between resume and job.
+    Works for any domain by comparing domain indicator profiles.
+    """
+    resume_domains = extract_domain_indicators(resume_text)
+    job_domains = extract_domain_indicators(job_description)
+
+    # Find dominant domain in each (domain with highest score)
+    resume_dominant = max(resume_domains, key=resume_domains.get) if resume_domains else None
+    job_dominant = max(job_domains, key=job_domains.get) if job_domains else None
+
+    resume_max_score = max(resume_domains.values()) if resume_domains else 0
+    job_max_score = max(job_domains.values()) if job_domains else 0
+
+    # Require minimum signal strength to consider a domain "detected"
+    min_signal_threshold = 2
+
+    resume_is_clear = resume_dominant and resume_max_score >= min_signal_threshold
+    job_is_clear = job_dominant and job_max_score >= min_signal_threshold
+
+    # If either doesn't have clear domain signals, apply small penalty (uncertainty)
+    if not resume_is_clear or not job_is_clear:
+        return 0.1  # 10% penalty for unclear domain signals
+
+    # If domains match, no penalty
+    if resume_dominant == job_dominant:
+        return 0.0
+
+    # If domains differ, apply penalty based on signal strength
+    # Stronger signals = higher penalty for mismatch
+    avg_signal = (resume_max_score + job_max_score) / 2
+    # Normalize penalty: 0.1 (weak signals) to 0.4 (strong signals)
+    penalty = min(0.4, 0.1 + (avg_signal * 0.05))
+
+    return penalty
+
+
 def format_batch_xml(batch: list[JobListing]) -> str:
     """Formats a batch of JobListing objects into structured XML tags."""
     xml_output = "<job_listings>\n"
@@ -124,36 +207,27 @@ async def _map_reduce_evaluate(listings: list[JobListing], resume_text: str) -> 
     for batch_idx, res in enumerate(results):
         if isinstance(res, RankedJobList):
             for match in res.ranked_jobs:
-                if match.job_id not in seen_job_ids and match.overall_score >= 50.0:
-                    seen_job_ids.add(match.job_id)
-                    all_evaluated.append(match)
+                if match.job_id not in seen_job_ids:
+                    # Find the job in the original listings to get its description for domain penalty
+                    job = next((job for job in listings if job.id == match.job_id), None)
+                    if job:
+                        domain_penalty = calculate_generic_domain_penalty(resume_text, job.description)
+                        # Adjust the overall score by domain penalty
+                        adjusted_score = match.overall_score * (1.0 - domain_penalty)
+                        match.overall_score = round(adjusted_score, 1)
+                        # Update rationale to note domain adjustment
+                        match.match_rationale = f"{match.match_rationale} [Domain relevance adjusted]"
+                    # Apply threshold after adjustment
+                    if match.overall_score >= 65.0:
+                        seen_job_ids.add(match.job_id)
+                        all_evaluated.append(match)
         elif isinstance(res, Exception):
             logger.warning("Error evaluating batch %d: %s. Applying fallback vector scoring.", batch_idx + 1, res)
 
-    # Fallback to vector similarity score if no LLM matches were produced
+    # Fallback: if no LLM matches, return empty results (better than irrelevant matches)
     if not all_evaluated:
-        logger.info("Using VectorSearchEngine fallback scoring for job listings...")
-        from core.vector_search import vector_engine
-        for job in listings:
-            if job.id not in seen_job_ids:
-                sim_score = vector_engine.compute_similarity(resume_text, job.description)
-                seen_job_ids.add(job.id)
-                all_evaluated.append(
-                    JobMatchAnalysis(
-                        job_id=job.id,
-                        job_title=job.title,
-                        company=job.company,
-                        url=job.url,
-                        overall_score=round(max(60.0, sim_score), 1),
-                        skills_match_score=round(max(65.0, sim_score), 1),
-                        experience_match_score=round(max(60.0, sim_score), 1),
-                        matching_skills=["Python", "Machine Learning", "Software Development"],
-                        missing_skills=[],
-                        match_rationale=f"Evaluated via vector similarity scoring ({sim_score:.0f}% match).",
-                        pros=["Strong domain alignment", "Matches candidate experience"],
-                        cons=[]
-                    )
-                )
+        logger.info("LLM ranking produced no matches. Returning empty results.")
+        return []
 
     # Sort matches by overall_score descending
     all_evaluated.sort(key=lambda m: m.overall_score, reverse=True)

@@ -20,6 +20,7 @@ from tenacity import (
 
 from core.dependencies import llm
 from core.state import AgentState
+from core.term_extractor import _extract_professional_terms_heuristic
 from utils.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -75,16 +76,28 @@ Candidate Preferences:
         queries_list = result.queries
     except Exception as e:  # noqa: BLE001
         logger.warning("LLM query generation encountered an error: %s. Using fallback query generator.", e)
-        roles = prefs.target_roles or ["Machine Learning Engineer", "AI Developer"]
-        locations = prefs.preferred_locations or ["Remote"]
-        loc_str = locations[0] if locations else "Remote"
 
-        queries_list = []
-        for role in roles:
+        # Extract professional terms from resume for domain-agnostic fallback
+        # Try to get from state first (if the node has run)
+        professional_terms = state.professional_terms
+        if not professional_terms:
+            # Fallback: extract from resume text using the heuristic
+            professional_terms = _extract_professional_terms_heuristic(resume_text)
+
+        if professional_terms:
+            # Generate queries based on actual resume terms
+            for term in professional_terms[:3]:  # Use top 3 terms
+                queries_list.extend([
+                    f'{term} job openings requirements',
+                    f'senior {term} hiring qualifications apply',
+                    f'{term} specialist career opportunity remote'
+                ])
+        else:
+            # If no professional terms found, use broad searches (better than misleading specific ones)
             queries_list.extend([
-                f"{role} {loc_str} job openings requirements",
-                f"Senior {role} hiring qualifications apply",
-                f"{role} software engineer career opportunity"
+                'job openings requirements apply',
+                'career opportunity hiring',
+                'professional position full time'
             ])
 
     logger.info("Done generating search queries ✅ — %d queries", len(queries_list))
