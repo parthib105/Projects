@@ -1,6 +1,5 @@
 # Let Git detect text files automatically
 * text=auto
-
 # Source/config/documentation files
 *.py text eol=lf
 *.md text eol=lf
@@ -10,3 +9,4 @@
 *.yml text eol=lf
 *.toml text eol=lf
 *.sh text eol=lf
+NeuralNetworks_From_Scratch/data/** filter=lfs diff=lfs merge=lfs -text
