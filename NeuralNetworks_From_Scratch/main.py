@@ -1,50 +1,81 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from neural_network.model import SimpleNN
 from neural_network.optimizer import SGD, Adam
 from neural_network.utils import accuracy
-import torchvision.datasets as datasets
+from datasets import load_dataset
 
-def plot_training_history(model, save_path=None):
+def load_mnist(data_dir: str = './data', cache_name: str = 'mnist.npz') -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Load MNIST from HuggingFace datasets, cached as .npz in data_dir."""
+    cache_path = os.path.join(data_dir, cache_name)
+
+    if os.path.exists(cache_path):
+        print("Loading MNIST from local cache...")
+        data = np.load(cache_path)
+        return data['X_train'], data['y_train'], data['X_test'], data['y_test']
+
+    print("Downloading MNIST from HuggingFace...")
+    ds = load_dataset("ylecun/mnist")
+
+    def to_xy(split) -> tuple[np.ndarray, np.ndarray]:
+        images = np.array(
+            [np.array(img).reshape(-1) for img in split["image"]],
+            dtype=np.float32
+        ) / 255.0
+        labels = np.array(split["label"], dtype=np.int64)
+        return images, labels
+
+    X_train, y_train = to_xy(ds["train"])
+    X_test, y_test = to_xy(ds["test"])
+
+    np.savez_compressed(cache_path, X_train=X_train, y_train=y_train,
+                        X_test=X_test, y_test=y_test)
+    print(f"Cached dataset to {cache_path}")
+    return X_train, y_train, X_test, y_test
+
+
+def plot_training_history(model: SimpleNN, save_path: str | None = None) -> None:
     """Plot training history"""
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+    params: tuple[Figure, list[Axes]] = plt.subplots(1, 2, figsize=(12, 4))
+    
+    ax: list[Axes] = params[1]
     
     # Plot loss
-    ax1.plot(model.train_losses, label='Train Loss')
+    ax[0].plot(model.train_losses, label='Train Loss')
     if model.val_losses:
-        ax1.plot(model.val_losses, label='Val Loss')
-    ax1.set_title('Training Loss')
-    ax1.set_xlabel('Epoch')
-    ax1.set_ylabel('Loss')
-    ax1.legend()
-    ax1.grid(True)
+        ax[0].plot(model.val_losses, label='Val Loss')
+    ax[0].set_title('Training Loss')
+    ax[0].set_xlabel('Epoch')
+    ax[0].set_ylabel('Loss')
+    ax[0].legend()
+    ax[0].grid(True)
     
     # Plot accuracy
-    ax2.plot(model.train_accuracies, label='Train Accuracy')
+    ax[1].plot(model.train_accuracies, label='Train Accuracy')
     if model.val_accuracies:
-        ax2.plot(model.val_accuracies, label='Val Accuracy')
-    ax2.set_title('Training Accuracy')
-    ax2.set_xlabel('Epoch')
-    ax2.set_ylabel('Accuracy')
-    ax2.legend()
-    ax2.grid(True)
+        ax[1].plot(model.val_accuracies, label='Val Accuracy')
+    ax[1].set_title('Training Accuracy')
+    ax[1].set_xlabel('Epoch')
+    ax[1].set_ylabel('Accuracy')
+    ax[1].legend()
+    ax[1].grid(True)
     
     plt.tight_layout()
+    
+    save_fig: str = "./path/training_hist"
     if save_path:
-        plt.savefig(save_path)
-    plt.show()
+        save_fig = os.path.join(save_path, "training_hist")
 
-def main():
-    # Load MNIST data
+    plt.savefig(save_fig)
+    
+
+def main() -> None:
+    # Load MNIST data from HuggingFace (with local caching)
     print("Loading MNIST data...")
-    mnist_trainset = datasets.MNIST(root='./data', train=True, download=True, transform=None)
-    mnist_testset = datasets.MNIST(root='./data', train=False, download=True, transform=None)
-
-    X_train = mnist_trainset.data.numpy().reshape(-1, 28*28) / 255.0
-    y_train = mnist_trainset.targets.numpy()
-
-    X_test = mnist_testset.data.numpy().reshape(-1, 28*28) / 255.0
-    y_test = mnist_testset.targets.numpy()
+    X_train, y_train, X_test, y_test = load_mnist()
 
     # Create validation set from training data
     val_size = 10000
@@ -87,7 +118,7 @@ def main():
     print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {test_acc:.4f}")
 
     # Plot training history
-    plot_training_history(model)
+    plot_training_history(model, "./plots")
 
     # Example predictions
     print("\nSample predictions:")

@@ -1,3 +1,14 @@
-numpy
-torchvision
-matplotlib
+# PyTorch with CUDA 12.4 should be installed via:
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+
+numpy>=1.26.0
+pyyaml>=6.0
+tqdm>=4.66.0
+matplotlib>=3.8.0
+scikit-learn>=1.4.0
+tensorboard>=2.16.0
+gradio>=4.20.0
+onnx>=1.16.0
+onnxruntime>=1.17.0
+pytest>=8.0.0
+ruff>=0.3.0
