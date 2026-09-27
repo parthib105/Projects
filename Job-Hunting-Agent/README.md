@@ -51,6 +51,7 @@ Job-Hunting-Agent/
 ├── Job_hunting_agent.py    # Backwards-compatible CLI script
 ├── sample_resume.txt       # Sample candidate resume for testing
 ├── IMPROVEMENT_PLAN.md     # 5-Phase Progressive Evolution Roadmap & Matrix
+├── ARCHITECTURE.md         # Runtime Architecture Diagram & Trust Boundaries
 ├── README.md               # Project documentation
 ├── requirements.txt        # Python package dependencies
 ├── .env                    # Environment configuration

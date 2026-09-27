@@ -1,0 +1,34 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+**/__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+*cache
+
+# Environments
+.env
+.venv
+env/
+venv/
+*/.nn-venv/
+env.bak/
+venv.bak/
+
+# IDEs
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Test cases
+test/
+
+# Guides and model lists
+*GUIDE.md
+list_models.py
+
+# Miscellaneous
+.DS_Store
+IMPROVEMENT*

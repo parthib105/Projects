@@ -1,0 +1,12 @@
+# Let Git detect text files automatically
+* text=auto
+
+# Source/config/documentation files
+*.py text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.sh text eol=lf
