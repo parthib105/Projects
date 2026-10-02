@@ -56,7 +56,7 @@ NeuralNetworks_From_Scratch/
 
 ---
 
-## Phase 1 — Core Model Architectures & Model Factory (highest priority)
+## Phase 1 — Core Model Architectures & Model Factory `[Completed]`
 ### 1.1 Configurable Arbitrary-Depth MLP `[Completed]`
 - **Goal:** Modular fully connected network supporting arbitrary depth, configurable layer dimensions, activations, dropout, and normalization.
 - **Files:** `src/models/mlp.py`, `src/models/__init__.py`, `tests/test_models.py`
@@ -69,17 +69,17 @@ NeuralNetworks_From_Scratch/
 - **Approach:** Implement `ConfigurableCNN(nn.Module)` with configurable `in_channels`, `conv_channels: list[int]`, `kernel_sizes: list[int]`, `fc_dims: list[int]`, `num_classes`, and spatial pooling.
 - **Acceptance:** Accepts both 1-channel 28x28 (MNIST/Fashion-MNIST) and 3-channel 32x32 (CIFAR-10) inputs; output tensor shape equals `(B, num_classes)`. Tests: 30/30 pytest passing.
 
-### 1.3 Custom ResNet / Residual Blocks
+### 1.3 Custom ResNet / Residual Blocks `[Completed]`
 - **Goal:** Deep residual network architecture with skip connections (`ResidualBlock`), bottleneck options, and projection downsampling.
-- **Files:** `src/models/resnet.py`, `src/models/__init__.py`
+- **Files:** `src/models/resnet.py`, `src/models/__init__.py`, `tests/test_models.py`
 - **Approach:** Implement `ResidualBlock(nn.Module)` with $3\times3$ convolutions, BatchNorm, and optional $1\times1$ projection shortcut for dimension changes. Implement `CustomResNet(nn.Module)` stacking multiple residual stages.
-- **Acceptance:** Clean gradient flow through 18+ layers without vanishing gradients; forward pass verified on GPU.
+- **Acceptance:** Clean gradient flow through 18+ layers without vanishing gradients; forward pass verified on GPU. Tests: 39/39 pytest passing.
 
-### 1.4 Unified Model Factory
+### 1.4 Unified Model Factory `[Completed]`
 - **Goal:** Instant model instantiation, architecture inspection, and parameter counting via configuration dictionary or YAML string.
-- **Files:** `src/models/factory.py`, `src/models/__init__.py`
+- **Files:** `src/models/factory.py`, `src/models/__init__.py`, `tests/test_models.py`
 - **Approach:** Implement `build_model(config: dict) -> nn.Module` that parses model type (`mlp`, `cnn`, `resnet`) and keyword arguments. Add helper `count_parameters(model) -> dict[str, int]` reporting total and trainable parameters.
-- **Acceptance:** `build_model({'type': 'cnn', ...})` creates correct instance and logs parameter count accurately.
+- **Acceptance:** `build_model({'type': 'cnn', ...})` creates correct instance and logs parameter count accurately. Tests: 45/45 pytest passing.
 
 ---
 

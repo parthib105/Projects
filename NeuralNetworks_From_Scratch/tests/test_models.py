@@ -1,11 +1,18 @@
-"""Unit tests for neural network model architectures."""
+"""Unit tests for neural network model architectures and model factory."""
 
 import pytest
 import torch
 import torch.nn as nn
 
 from src.models.cnn import ConfigurableCNN
+from src.models.factory import (
+    MODEL_REGISTRY,
+    build_model,
+    count_parameters,
+    register_model,
+)
 from src.models.mlp import ACTIVATION_REGISTRY, ConfigurableMLP
+from src.models.resnet import CustomResNet, ResidualBlock, conv1x1
 from src.utils.device import get_device
 
 
@@ -263,3 +270,198 @@ class TestConfigurableCNN:
 
         with pytest.raises(ValueError, match="Length of kernel_sizes"):
             ConfigurableCNN(conv_channels=[32, 64], kernel_sizes=[3, 3, 3])
+
+
+class TestCustomResNet:
+    """Test suite for CustomResNet architecture and ResidualBlock."""
+
+    def test_residual_block_stride1_no_downsample(self):
+        """Test basic ResidualBlock preserves dimensions with stride 1."""
+        block = ResidualBlock(in_channels=64, out_channels=64, stride=1)
+        dummy_x = torch.randn(2, 64, 16, 16)
+        out = block(dummy_x)
+        assert out.shape == (2, 64, 16, 16)
+
+    def test_residual_block_stride2_with_downsample(self):
+        """Test ResidualBlock with downsampling projection reduces spatial dims."""
+        downsample = nn.Sequential(
+            conv1x1(64, 128, stride=2),
+            nn.BatchNorm2d(128),
+        )
+        block = ResidualBlock(in_channels=64, out_channels=128, stride=2, downsample=downsample)
+        dummy_x = torch.randn(2, 64, 16, 16)
+        out = block(dummy_x)
+        assert out.shape == (2, 128, 8, 8)
+
+    @pytest.mark.parametrize(
+        "in_channels,spatial_size,block_counts,stage_channels,num_classes",
+        [
+            (1, (28, 28), [1, 1, 1, 1], [16, 32, 64, 128], 10),  # ResNet-10 for MNIST
+            (3, (32, 32), [2, 2, 2, 2], [32, 64, 128, 256], 10),  # ResNet-18 for CIFAR-10
+            (3, (64, 64), [2, 2], [32, 64], 5),  # 2-stage ResNet
+        ],
+    )
+    def test_custom_resnet_forward_pass(
+        self, in_channels, spatial_size, block_counts, stage_channels, num_classes
+    ):
+        """Verify CustomResNet forward pass outputs (B, num_classes) cleanly."""
+        model = CustomResNet(
+            in_channels=in_channels,
+            num_classes=num_classes,
+            block_counts=block_counts,
+            stage_channels=stage_channels,
+            small_inputs=True,
+        )
+        dummy_x = torch.randn(4, in_channels, *spatial_size)
+        out = model(dummy_x)
+
+        assert out.shape == (4, num_classes)
+        assert not torch.isnan(out).any()
+
+    def test_resnet_feature_extraction(self):
+        """Verify feature extractor returns spatial feature maps."""
+        model = CustomResNet(
+            in_channels=1,
+            num_classes=10,
+            block_counts=[1, 1],
+            stage_channels=[16, 32],
+            small_inputs=True,
+        )
+        dummy_x = torch.randn(2, 1, 28, 28)
+        features = model.extract_features(dummy_x)
+        # Stem (28x28) -> Stage 1 (stride 1: 28x28) -> Stage 2 (stride 2: 14x14)
+        assert features.shape == (2, 32, 14, 14)
+
+    def test_resnet_backward_pass_and_gradient_flow(self):
+        """Verify loss backpropagation flows gradients through all residual blocks."""
+        model = CustomResNet(
+            in_channels=1,
+            num_classes=10,
+            block_counts=[1, 1, 1, 1],
+            stage_channels=[16, 32, 64, 128],
+            small_inputs=True,
+        )
+        dummy_x = torch.randn(4, 1, 28, 28)
+        targets = torch.randint(0, 10, (4,))
+
+        criterion = nn.CrossEntropyLoss()
+        logits = model(dummy_x)
+        loss = criterion(logits, targets)
+        loss.backward()
+
+        for name, param in model.named_parameters():
+            assert param.grad is not None, f"Gradient missing for {name}"
+            assert not torch.isnan(param.grad).any(), f"NaN gradient in {name}"
+
+    def test_resnet_cuda_execution(self):
+        """Verify CustomResNet executes on CUDA if available."""
+        device = get_device("auto")
+        model = CustomResNet(
+            in_channels=3,
+            num_classes=10,
+            block_counts=[1, 1],
+            stage_channels=[32, 64],
+            small_inputs=True,
+        ).to(device)
+
+        dummy_x = torch.randn(4, 3, 32, 32, device=device)
+        out = model(dummy_x)
+
+        assert out.device.type == device.type
+        assert out.shape == (4, 10)
+
+    def test_invalid_parameters_raise_errors(self):
+        """Verify parameter mismatches raise errors."""
+        with pytest.raises(ValueError, match="in_channels must be positive"):
+            CustomResNet(in_channels=0)
+
+        with pytest.raises(ValueError, match="num_classes must be positive"):
+            CustomResNet(num_classes=-1)
+
+        with pytest.raises(ValueError, match="block_counts length"):
+            CustomResNet(block_counts=[2, 2, 2], stage_channels=[64, 128])
+
+
+class TestModelFactory:
+    """Test suite for build_model, count_parameters, and register_model."""
+
+    def test_build_mlp_from_flat_dict(self):
+        """Verify build_model instantiates ConfigurableMLP from flat dictionary."""
+        config = {
+            "type": "mlp",
+            "input_dim": 784,
+            "hidden_dims": [128, 64],
+            "output_dim": 10,
+        }
+        model = build_model(config)
+        assert isinstance(model, ConfigurableMLP)
+        assert model.input_dim == 784
+        assert model.output_dim == 10
+
+    def test_build_model_from_nested_dict(self):
+        """Verify build_model handles nested {'model': {...}} configuration."""
+        config = {
+            "model": {
+                "type": "cnn",
+                "in_channels": 1,
+                "conv_channels": [16, 32],
+                "num_classes": 10,
+            }
+        }
+        model = build_model(config)
+        assert isinstance(model, ConfigurableCNN)
+        assert model.in_channels == 1
+
+    def test_build_resnet_from_dict(self):
+        """Verify build_model instantiates CustomResNet from config."""
+        config = {
+            "type": "resnet",
+            "in_channels": 3,
+            "num_classes": 10,
+            "block_counts": [1, 1],
+            "stage_channels": [32, 64],
+        }
+        model = build_model(config)
+        assert isinstance(model, CustomResNet)
+        assert model.num_classes == 10
+
+    def test_count_parameters_accuracy(self):
+        """Verify count_parameters returns accurate total and trainable counts."""
+        linear = nn.Linear(10, 5)  # 10*5 + 5 = 55
+        counts = count_parameters(linear)
+        assert counts["total_parameters"] == 55
+        assert counts["trainable_parameters"] == 55
+
+        # Freeze weights
+        linear.weight.requires_grad = False
+        counts_frozen = count_parameters(linear)
+        assert counts_frozen["total_parameters"] == 55
+        assert counts_frozen["trainable_parameters"] == 5  # only bias is trainable
+
+    def test_register_custom_model(self):
+        """Verify dynamic registration of custom models into the factory."""
+
+        class SimpleDummy(nn.Module):
+            def __init__(self, size: int = 10):
+                super().__init__()
+                self.fc = nn.Linear(size, size)
+
+            def forward(self, x):
+                return self.fc(x)
+
+        register_model("dummy_model", SimpleDummy)
+        assert "dummy_model" in MODEL_REGISTRY
+
+        built = build_model({"type": "dummy_model", "size": 16})
+        assert isinstance(built, SimpleDummy)
+
+    def test_invalid_factory_configs(self):
+        """Verify error handling on invalid configurations."""
+        with pytest.raises(ValueError, match="must specify 'type' or 'name'"):
+            build_model({"hidden_dims": [128]})
+
+        with pytest.raises(ValueError, match="Unknown model type"):
+            build_model({"type": "non_existent_architecture"})
+
+        with pytest.raises(TypeError, match="Failed to instantiate model"):
+            build_model({"type": "mlp", "unexpected_arg_123": True})
