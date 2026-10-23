@@ -10,12 +10,14 @@ Usage:
 
 import os
 import tempfile
+from typing import cast
 import pandas as pd
 import streamlit as st
+from langchain_core.runnables import RunnableConfig
 
 from core import app as workflow_app
 from core.resume_parser import parse_resume_from_bytes
-from core.state import ApplicationMaterials, JobMatchAnalysis, UserPreferences
+from core.state import AgentState, ApplicationMaterials, JobMatchAnalysis, UserPreferences
 from database.manager import db
 
 # ── Page Configuration ──
@@ -134,9 +136,9 @@ def main() -> None:
 
         provider_choice = st.selectbox(
             "Search Provider",
-            options=["duckduckgo", "tavily"],
+            options=["duckduckgo", "tavily", "adzuna"],
             index=0,
-            help="DuckDuckGo is 100% free with no API key required."
+            help="DuckDuckGo (free, open source), Tavily (requires key), or Adzuna (structured job search API)."
         )
 
         search_button = st.button("🚀 Launch Job Search", use_container_width=True, type="primary")
@@ -154,11 +156,11 @@ def main() -> None:
             remote_preference=remote_pref
         )
 
-        inputs = {
+        inputs = cast(AgentState, {
             "resume_path": resume_path,
             "preferences": user_prefs
-        }
-        config = {"configurable": {"thread_id": "streamlit_session"}}
+        })
+        config: RunnableConfig = {"configurable": {"thread_id": "streamlit_session"}}
 
         with st.spinner("Analyzing resume, searching web, ranking jobs & generating tailored materials..."):
             try:

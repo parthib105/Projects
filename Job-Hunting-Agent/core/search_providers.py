@@ -53,13 +53,13 @@ class DuckDuckGoSearchProvider(BaseSearchProvider):
     def __init__(self) -> None:
         super().__init__(provider_name="DuckDuckGo")
         try:
-            from duckduckgo_search import DDGS
+            from ddgs import DDGS
             self._ddgs_cls = DDGS
-        except ImportError:
+        except ImportError as exc:
             raise ImportError(
-                "duckduckgo-search / ddgs package is required for DuckDuckGoSearchProvider. "
+                "The ddgs package is required for DuckDuckGoSearchProvider. "
                 "Install it using: pip install ddgs"
-            )
+            ) from exc
 
     async def search_async(self, query: str, max_results: int = 5) -> list[JobListing]:
         """Executes a DuckDuckGo text search asynchronously in an executor thread."""
@@ -110,6 +110,17 @@ class TavilySearchProvider(BaseSearchProvider):
 
     def __init__(self) -> None:
         super().__init__(provider_name="Tavily")
+        self._tool = tavily_tool
+        if self._tool is None:
+            try:
+                from langchain_tavily import TavilySearch
+                self._tool = TavilySearch(
+                    max_results=config.max_search_results,
+                    api_key=config.tavily_api_key,
+                )
+            except Exception as e:
+                logger.warning("Could not initialize TavilySearch: %s", e)
+                self._tool = None
 
     async def search_async(self, query: str, max_results: int = 5) -> list[JobListing]:
         """Executes a Tavily search asynchronously in an executor thread."""
@@ -118,8 +129,12 @@ class TavilySearchProvider(BaseSearchProvider):
 
     def _sync_search(self, query: str, max_results: int) -> list[JobListing]:
         listings: list[JobListing] = []
+        if self._tool is None:
+            logger.warning("Tavily search tool is not available (check TAVILY_API_KEY).")
+            return listings
+
         try:
-            search_results = tavily_tool.invoke({"query": query})
+            search_results = self._tool.invoke({"query": query})
 
             results_to_process = []
             if isinstance(search_results, dict):

@@ -7,6 +7,7 @@ against candidate resumes using a Map-Reduce parallel batching architecture.
 
 import asyncio
 import logging
+import re
 from typing import Any
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -31,8 +32,6 @@ def extract_domain_indicators(text: str) -> dict[str, int]:
     """Extract domain-specific indicators from text using keyword categories.
     Returns a dictionary of domain scores.
     """
-    # Define domain categories with associated keywords
-    # This can be extended/customized based on observed resume/job patterns
     domain_keywords = {
         'healthcare': {
             'patient', 'clinical', 'therapy', 'rehabilitation', 'medical', 'healthcare',
@@ -42,7 +41,7 @@ def extract_domain_indicators(text: str) -> dict[str, int]:
         'technology': {
             'software', 'programming', 'developer', 'engineer', 'algorithm', 'database',
             'web', 'mobile', 'api', 'framework', 'language', 'python', 'java', 'javascript',
-            'sql', 'cloud', 'devops', 'agile', 'scrum', 'data', 'system', 'IT'
+            'sql', 'cloud', 'devops', 'agile', 'scrum', 'data', 'system', 'it'
         },
         'business': {
             'management', 'marketing', 'sales', 'finance', 'accounting', 'hr', 'human resources',
@@ -60,14 +59,21 @@ def extract_domain_indicators(text: str) -> dict[str, int]:
             'engineering', 'mechanical', 'electrical', 'civil', 'chemical', 'manufacturing',
             'industrial', 'robotics', 'automotive', 'aerospace', 'construction'
         }
-        # Add more domains as needed
     }
 
     text_lower = text.lower()
+    words_set = set(re.findall(r'\b[a-z0-9_+#.-]+\b', text_lower))
     domain_scores = {}
 
     for domain, keywords in domain_keywords.items():
-        score = sum(1 for keyword in keywords if keyword in text_lower)
+        score = 0
+        for kw in keywords:
+            kw_lower = kw.lower()
+            if ' ' in kw_lower:
+                if kw_lower in text_lower:
+                    score += 1
+            elif kw_lower in words_set:
+                score += 1
         domain_scores[domain] = score
 
     return domain_scores
@@ -81,8 +87,8 @@ def calculate_generic_domain_penalty(resume_text: str, job_description: str) -> 
     job_domains = extract_domain_indicators(job_description)
 
     # Find dominant domain in each (domain with highest score)
-    resume_dominant = max(resume_domains, key=resume_domains.get) if resume_domains else None
-    job_dominant = max(job_domains, key=job_domains.get) if job_domains else None
+    resume_dominant = max(resume_domains, key=lambda domain: resume_domains[domain]) if resume_domains else None
+    job_dominant = max(job_domains, key=lambda domain: job_domains[domain]) if job_domains else None
 
     resume_max_score = max(resume_domains.values()) if resume_domains else 0
     job_max_score = max(job_domains.values()) if job_domains else 0
@@ -185,10 +191,19 @@ Calculate overall_score = (Skill_Fit * 0.40) + (Experience * 0.30) + (Domain * 0
     chain = prompt | structured_llm
 
     loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(
+    result = await loop.run_in_executor(
         None,
         lambda: chain.invoke({"resume": resume_text, "listings": formatted_listings})
     )
+
+    if isinstance(result, RankedJobList):
+        return result
+    if isinstance(result, dict):
+        return RankedJobList.model_validate(result)
+    if hasattr(result, "model_dump"):
+        return RankedJobList.model_validate(result.model_dump())
+
+    raise TypeError(f"Unexpected structured output type for batch evaluation: {type(result)!r}")
 
 
 async def _map_reduce_evaluate(listings: list[JobListing], resume_text: str) -> list[JobMatchAnalysis]:
@@ -198,7 +213,7 @@ async def _map_reduce_evaluate(listings: list[JobListing], resume_text: str) -> 
     logger.info("Map-Reduce: Evaluating %d listings across %d parallel batches", len(listings), len(batches))
 
     tasks = [_evaluate_batch_async(batch, resume_text) for batch in batches]
-    results: list[RankedJobList | Exception] = await asyncio.gather(*tasks, return_exceptions=True)
+    results: list[RankedJobList | BaseException] = await asyncio.gather(*tasks, return_exceptions=True)
 
     # Reduce Phase: Aggregate, deduplicate, filter, and sort top matches
     all_evaluated: list[JobMatchAnalysis] = []

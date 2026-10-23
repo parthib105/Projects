@@ -209,7 +209,7 @@ class Config:
         errors = []
 
         # Validate search provider and required API keys
-        valid_providers ={"duckduckgo", "tavily", "adzuna", "serpapi"}
+        valid_providers = {"duckduckgo", "tavily", "adzuna", "serpapi"}
         if self._search_provider not in valid_providers:
             errors.append(
                 f"SEARCH_PROVIDER must be one of {valid_providers}, got '{self._search_provider}'"
@@ -269,19 +269,27 @@ class Config:
             str: Template content for .env file
         """
         return """# Job Hunting Agent Configuration
+# Copy this template to .env and fill in your API keys
 
-            # Copy this template to .env and fill in your API keys
+# Required LLM API Key
+GOOGLE_API_KEY=your_google_api_key_here
 
-            # Required API Keys
-            GOOGLE_API_KEY=your_google_api_key_here
-            TAVILY_API_KEY=your_tavily_api_key_here
+# Search Provider Selection (duckduckgo, tavily, or adzuna)
+SEARCH_PROVIDER=duckduckgo
 
-            # Optional Settings (with defaults)
-            LLM_TEMPERATURE=0.6
-            MAX_SEARCH_RESULTS=5
-            LLM_MODEL=gemini-2.0-flash
-            LOG_LEVEL=INFO
-        """
+# Provider Specific API Keys
+TAVILY_API_KEY=your_tavily_api_key_here
+ADZUNA_APP_ID=your_adzuna_app_id_here
+ADZUNA_APP_KEY=your_adzuna_app_key_here
+
+# Model Selection & Inference Settings
+LLM_MODEL=gemini-2.0-flash
+REASONING_LLM_MODEL=gemini-1.5-pro
+LLM_TEMPERATURE=0.6
+MAX_SEARCH_RESULTS=5
+LOG_LEVEL=INFO
+"""
+
 
 if __name__ == "__main__":
     # Example usage

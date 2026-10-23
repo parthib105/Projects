@@ -33,8 +33,13 @@ reasoning_llm = ChatGoogleGenerativeAI(
     google_api_key=config.google_api_key,
 )
 
-# ── Search tool (will be replaced with a DB query in Phase 2) ──
-tavily_tool = TavilySearch(
-    max_results=config.max_search_results,
-    api_key=config.tavily_api_key,
-)
+# ── Search tool (initialized if API key is present or on demand) ──
+tavily_tool = None
+try:
+    if config._tavily_api_key and config._tavily_api_key != "your_tavily_api_key_here":
+        tavily_tool = TavilySearch(
+            max_results=config.max_search_results,
+            api_key=config.tavily_api_key,
+        )
+except Exception:  # noqa: BLE001
+    tavily_tool = None
